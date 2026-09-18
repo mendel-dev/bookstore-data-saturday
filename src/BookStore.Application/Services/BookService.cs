@@ -1,31 +1,27 @@
+using BookStore.Application.Repositories;
 using BookStore.Domain.Entities;
-using BookStore.Infrastructure.Data;
-using Microsoft.EntityFrameworkCore;
 
 namespace BookStore.Application.Services;
 
 public class BookService : IBookService
 {
-    private readonly BookStoreContext _db;
+    private readonly IBookRepository _books;
+    private readonly IAuthorRepository _authors;
 
-    public BookService(BookStoreContext db)
+    public BookService(IBookRepository books, IAuthorRepository authors)
     {
-        _db = db;
+        _books = books;
+        _authors = authors;
     }
 
     public async Task<List<Book>> GetAllAsync()
     {
-        return await _db.Books
-            .Include(b => b.Author)
-            .OrderBy(b => b.Title)
-            .ToListAsync();
+        return await _books.GetAllWithAuthorAsync();
     }
 
     public async Task<Book?> GetByIdAsync(int id)
     {
-        return await _db.Books
-            .Include(b => b.Author)
-            .FirstOrDefaultAsync(b => b.Id == id);
+        return await _books.GetByIdWithAuthorAsync(id);
     }
 
     public async Task<Book> CreateAsync(Book book)
@@ -50,7 +46,7 @@ public class BookService : IBookService
             throw new InvalidOperationException("Published date cannot be in the future.");
         }
 
-        var authorExists = await _db.Authors.AnyAsync(a => a.Id == book.AuthorId);
+        var authorExists = await _authors.ExistsAsync(book.AuthorId);
         if (!authorExists)
         {
             throw new InvalidOperationException("Author does not exist.");
@@ -62,14 +58,15 @@ public class BookService : IBookService
         book.Description = (book.Description ?? string.Empty).Trim();
         book.IsAvailable = book.Stock > 0;
 
-        _db.Books.Add(book);
-        await _db.SaveChangesAsync();
+        await _books.AddAsync(book);
+        await _books.SaveChangesAsync();
         return book;
     }
 
+
     public async Task<Book?> UpdateAsync(int id, Book book)
     {
-        var existing = await _db.Books.FirstOrDefaultAsync(b => b.Id == id);
+        var existing = await _books.GetByIdAsync(id);
         if (existing is null)
         {
             return null;
@@ -95,7 +92,7 @@ public class BookService : IBookService
             throw new InvalidOperationException("Published date cannot be in the future.");
         }
 
-        var authorExists = await _db.Authors.AnyAsync(a => a.Id == book.AuthorId);
+        var authorExists = await _authors.ExistsAsync(book.AuthorId);
         if (!authorExists)
         {
             throw new InvalidOperationException("Author does not exist.");
@@ -111,20 +108,20 @@ public class BookService : IBookService
         existing.AuthorId = book.AuthorId;
         existing.IsAvailable = book.Stock > 0;
 
-        await _db.SaveChangesAsync();
+        await _books.SaveChangesAsync();
         return existing;
     }
 
     public async Task<bool> DeleteAsync(int id)
     {
-        var existing = await _db.Books.FirstOrDefaultAsync(b => b.Id == id);
+        var existing = await _books.GetByIdAsync(id);
         if (existing is null)
         {
             return false;
         }
 
-        _db.Books.Remove(existing);
-        await _db.SaveChangesAsync();
+        _books.Remove(existing);
+        await _books.SaveChangesAsync();
         return true;
     }
 }

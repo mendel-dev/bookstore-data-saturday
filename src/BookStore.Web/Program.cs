@@ -1,5 +1,7 @@
+using BookStore.Application.Repositories;
 using BookStore.Application.Services;
 using BookStore.Infrastructure.Data;
+using BookStore.Infrastructure.Repositories;
 using BookStore.Infrastructure.Seed;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,6 +12,8 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<BookStoreContext>(options =>
     options.UseInMemoryDatabase("BookStoreDb"));
 
+builder.Services.AddScoped<IAuthorRepository, AuthorRepository>();
+builder.Services.AddScoped<IBookRepository, BookRepository>();
 builder.Services.AddScoped<IAuthorService, AuthorService>();
 builder.Services.AddScoped<IBookService, BookService>();
 

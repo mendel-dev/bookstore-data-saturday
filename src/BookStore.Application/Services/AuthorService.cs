@@ -1,31 +1,25 @@
+using BookStore.Application.Repositories;
 using BookStore.Domain.Entities;
-using BookStore.Infrastructure.Data;
-using Microsoft.EntityFrameworkCore;
 
 namespace BookStore.Application.Services;
 
 public class AuthorService : IAuthorService
 {
-    private readonly BookStoreContext _db;
+    private readonly IAuthorRepository _authors;
 
-    public AuthorService(BookStoreContext db)
+    public AuthorService(IAuthorRepository authors)
     {
-        _db = db;
+        _authors = authors;
     }
 
     public async Task<List<Author>> GetAllAsync()
     {
-        return await _db.Authors
-            .Include(a => a.Books)
-            .OrderBy(a => a.Name)
-            .ToListAsync();
+        return await _authors.GetAllWithBooksAsync();
     }
 
     public async Task<Author?> GetByIdAsync(int id)
     {
-        return await _db.Authors
-            .Include(a => a.Books)
-            .FirstOrDefaultAsync(a => a.Id == id);
+        return await _authors.GetByIdWithBooksAsync(id);
     }
 
     public async Task<Author> CreateAsync(Author author)
@@ -49,14 +43,14 @@ public class AuthorService : IAuthorService
         author.Nationality = (author.Nationality ?? string.Empty).Trim();
         author.Bio = (author.Bio ?? string.Empty).Trim();
 
-        _db.Authors.Add(author);
-        await _db.SaveChangesAsync();
+        await _authors.AddAsync(author);
+        await _authors.SaveChangesAsync();
         return author;
     }
 
     public async Task<Author?> UpdateAsync(int id, Author author)
     {
-        var existing = await _db.Authors.FirstOrDefaultAsync(a => a.Id == id);
+        var existing = await _authors.GetByIdAsync(id);
         if (existing is null)
         {
             return null;
@@ -77,15 +71,13 @@ public class AuthorService : IAuthorService
         existing.Nationality = (author.Nationality ?? string.Empty).Trim();
         existing.BirthDate = author.BirthDate;
 
-        await _db.SaveChangesAsync();
+        await _authors.SaveChangesAsync();
         return existing;
     }
 
     public async Task<bool> DeleteAsync(int id)
     {
-        var existing = await _db.Authors
-            .Include(a => a.Books)
-            .FirstOrDefaultAsync(a => a.Id == id);
+        var existing = await _authors.GetByIdWithBooksAsync(id);
 
         if (existing is null)
         {
@@ -97,8 +89,8 @@ public class AuthorService : IAuthorService
             throw new InvalidOperationException("Cannot delete an author who still has books.");
         }
 
-        _db.Authors.Remove(existing);
-        await _db.SaveChangesAsync();
+        _authors.Remove(existing);
+        await _authors.SaveChangesAsync();
         return true;
     }
 }
