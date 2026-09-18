@@ -1,18 +1,18 @@
-using BookStore.Domain.Data;
 using BookStore.Domain.Entities;
+using BookStore.Infrastructure.Data;
 
-namespace BookStore.Domain.Seed;
+namespace BookStore.Infrastructure.Seed;
 
 public static class DataSeeder
 {
-    public static void Seed(BookStoreContext db)
+  public static void Seed(BookStoreContext db)
+  {
+    if (db.Authors.Any() || db.Books.Any())
     {
-        if (db.Authors.Any() || db.Books.Any())
-        {
-            return;
-        }
+      return;
+    }
 
-        var authors = new List<Author>
+    var authors = new List<Author>
         {
             new() { Id = 1,  Name = "George Orwell",          Nationality = "British",   BirthDate = new DateTime(1903, 6, 25),  Bio = "English novelist and essayist, known for 1984 and Animal Farm." },
             new() { Id = 2,  Name = "Jane Austen",            Nationality = "British",   BirthDate = new DateTime(1775, 12, 16), Bio = "English novelist known for her social commentary." },
@@ -26,9 +26,9 @@ public static class DataSeeder
             new() { Id = 10, Name = "Virginia Woolf",         Nationality = "British",   BirthDate = new DateTime(1882, 1, 25),  Bio = "Modernist author and critic." }
         };
 
-        db.Authors.AddRange(authors);
+    db.Authors.AddRange(authors);
 
-        var books = new List<Book>
+    var books = new List<Book>
         {
             new() { Id = 1,  AuthorId = 1, Title = "1984",                          Isbn = "9780451524935", Genre = "Dystopian",       Price = 14.99m, Stock = 25, PublishedDate = new DateTime(1949, 6, 8),   Description = "A dystopian social science fiction novel." },
             new() { Id = 2,  AuthorId = 1, Title = "Animal Farm",                   Isbn = "9780451526342", Genre = "Allegory",        Price = 9.99m,  Stock = 40, PublishedDate = new DateTime(1945, 8, 17),  Description = "An allegorical novella." },
@@ -59,12 +59,12 @@ public static class DataSeeder
             new() { Id = 27, AuthorId = 10, Title = "Orlando",                      Isbn = "9780156701600", Genre = "Modernist",       Price = 13.50m, Stock = 0,  PublishedDate = new DateTime(1928, 10, 11), Description = "A poet who changes sex and lives for centuries." }
         };
 
-        foreach (var book in books)
-        {
-            book.IsAvailable = book.Stock > 0;
-        }
-
-        db.Books.AddRange(books);
-        db.SaveChanges();
+    foreach (var book in books)
+    {
+      book.IsAvailable = book.Stock > 0;
     }
+
+    db.Books.AddRange(books);
+    db.SaveChanges();
+  }
 }

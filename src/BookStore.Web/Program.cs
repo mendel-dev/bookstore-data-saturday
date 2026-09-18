@@ -1,6 +1,6 @@
 using BookStore.Application.Services;
-using BookStore.Domain.Data;
-using BookStore.Domain.Seed;
+using BookStore.Infrastructure.Data;
+using BookStore.Infrastructure.Seed;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);

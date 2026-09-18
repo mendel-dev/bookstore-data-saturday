@@ -1,5 +1,5 @@
-using BookStore.Domain.Data;
 using BookStore.Domain.Entities;
+using BookStore.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
 namespace BookStore.Application.Services;
