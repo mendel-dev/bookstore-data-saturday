@@ -5,4 +5,5 @@
   <Project Path="BookStore.Infrastructure/BookStore.Infrastructure.csproj" />
   <Project Path="BookStore.Shared/BookStore.Shared.csproj" />
   <Project Path="BookStore.Web/BookStore.Web.csproj" />
+  <Project Path="../tests/BookStore.Application.Tests/BookStore.Application.Tests.csproj" />
 </Solution>
