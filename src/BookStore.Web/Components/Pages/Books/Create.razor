@@ -1,0 +1,91 @@
+@page "/books/new"
+@inject BookApiClient BookApi
+@inject AuthorApiClient AuthorApi
+@inject NavigationManager Nav
+
+<PageTitle>New book</PageTitle>
+
+<h1 class="h3 mb-3">New book</h1>
+
+<EditForm Model="@request" OnValidSubmit="HandleCreate">
+    <DataAnnotationsValidator />
+    @if (!string.IsNullOrEmpty(error))
+    {
+        <div class="alert alert-danger">@error</div>
+    }
+
+    <div class="row g-3">
+        <div class="col-md-8">
+            <label class="form-label">Title</label>
+            <InputText class="form-control" @bind-Value="request.Title" />
+            <ValidationMessage For="@(() => request.Title)" class="text-danger" />
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">ISBN</label>
+            <InputText class="form-control" @bind-Value="request.Isbn" />
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Author</label>
+            <select class="form-select" @bind="request.AuthorId">
+                <option value="0">-- select an author --</option>
+                @if (authors is not null)
+                {
+                    @foreach (var author in authors)
+                    {
+                        <option value="@author.Id">@author.Name</option>
+                    }
+                }
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label class="form-label">Genre</label>
+            <InputText class="form-control" @bind-Value="request.Genre" />
+        </div>
+        <div class="col-md-3">
+            <label class="form-label">Published date</label>
+            <InputDate class="form-control" @bind-Value="request.PublishedDate" />
+        </div>
+        <div class="col-md-3">
+            <label class="form-label">Price</label>
+            <InputNumber class="form-control" step="0.01" @bind-Value="request.Price" />
+        </div>
+        <div class="col-md-3">
+            <label class="form-label">Stock</label>
+            <InputNumber class="form-control" @bind-Value="request.Stock" />
+        </div>
+        <div class="col-12">
+            <label class="form-label">Description</label>
+            <InputTextArea class="form-control" rows="3" @bind-Value="request.Description" />
+        </div>
+    </div>
+
+    <div class="mt-3">
+        <button type="submit" class="btn btn-primary">Create</button>
+        <a class="btn btn-secondary" href="books">Cancel</a>
+    </div>
+</EditForm>
+
+@code {
+    private readonly BookRequest request = new();
+    private List<AuthorResponse>? authors;
+    private string? error;
+
+    protected override async Task OnInitializedAsync()
+    {
+        authors = await AuthorApi.GetAllAsync();
+    }
+
+    private async Task HandleCreate()
+    {
+        error = null;
+        try
+        {
+            await BookApi.CreateAsync(request);
+            Nav.NavigateTo("books");
+        }
+        catch (ApiException ex)
+        {
+            error = ex.Message;
+        }
+    }
+}

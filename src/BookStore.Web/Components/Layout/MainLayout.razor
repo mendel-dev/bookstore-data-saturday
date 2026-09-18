@@ -1,0 +1,22 @@
+@inherits LayoutComponentBase
+
+<header>
+    <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="">BookStore.Web</a>
+            <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                <NavMenu />
+            </div>
+        </div>
+    </nav>
+</header>
+<div class="container">
+    <main role="main" class="pb-3">
+        @Body
+    </main>
+</div>
+<footer class="border-top footer text-muted">
+    <div class="container">
+        &copy; 2026 - BookStore.Web - <a href="privacy">Privacy</a>
+    </div>
+</footer>

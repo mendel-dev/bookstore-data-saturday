@@ -1,0 +1,55 @@
+@page "/authors"
+@inject AuthorApiClient AuthorApi
+
+<PageTitle>Authors</PageTitle>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h3 mb-0">Authors</h1>
+    <a class="btn btn-primary" href="authors/new">New author</a>
+</div>
+
+@if (authors is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-striped table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Name</th>
+                    <th>Nationality</th>
+                    <th>Birth date</th>
+                    <th class="text-end">Books</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var author in authors)
+                {
+                    <tr>
+                        <td>@author.Name</td>
+                        <td>@author.Nationality</td>
+                        <td>@author.BirthDate.ToString("yyyy-MM-dd")</td>
+                        <td class="text-end">@author.BookCount</td>
+                        <td class="text-end">
+                            <a class="btn btn-sm btn-outline-secondary" href="@($"authors/{author.Id}")">Details</a>
+                            <a class="btn btn-sm btn-outline-primary" href="@($"authors/{author.Id}/edit")">Edit</a>
+                            <a class="btn btn-sm btn-outline-danger" href="@($"authors/{author.Id}/delete")">Delete</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+@code {
+    private List<AuthorResponse>? authors;
+
+    protected override async Task OnInitializedAsync()
+    {
+        authors = await AuthorApi.GetAllAsync();
+    }
+}

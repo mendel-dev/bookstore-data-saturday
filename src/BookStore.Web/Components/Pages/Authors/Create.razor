@@ -1,0 +1,59 @@
+@page "/authors/new"
+@inject AuthorApiClient AuthorApi
+@inject NavigationManager Nav
+
+<PageTitle>New author</PageTitle>
+
+<h1 class="h3 mb-3">New author</h1>
+
+<EditForm Model="@request" OnValidSubmit="HandleCreate">
+    <DataAnnotationsValidator />
+    @if (!string.IsNullOrEmpty(error))
+    {
+        <div class="alert alert-danger">@error</div>
+    }
+
+    <div class="row g-3">
+        <div class="col-md-6">
+            <label class="form-label">Name</label>
+            <InputText class="form-control" @bind-Value="request.Name" />
+            <ValidationMessage For="@(() => request.Name)" class="text-danger" />
+        </div>
+        <div class="col-md-3">
+            <label class="form-label">Nationality</label>
+            <InputText class="form-control" @bind-Value="request.Nationality" />
+        </div>
+        <div class="col-md-3">
+            <label class="form-label">Birth date</label>
+            <InputDate class="form-control" @bind-Value="request.BirthDate" />
+        </div>
+        <div class="col-12">
+            <label class="form-label">Bio</label>
+            <InputTextArea class="form-control" rows="4" @bind-Value="request.Bio" />
+        </div>
+    </div>
+
+    <div class="mt-3">
+        <button type="submit" class="btn btn-primary">Create</button>
+        <a class="btn btn-secondary" href="authors">Cancel</a>
+    </div>
+</EditForm>
+
+@code {
+    private readonly AuthorRequest request = new();
+    private string? error;
+
+    private async Task HandleCreate()
+    {
+        error = null;
+        try
+        {
+            await AuthorApi.CreateAsync(request);
+            Nav.NavigateTo("authors");
+        }
+        catch (ApiException ex)
+        {
+            error = ex.Message;
+        }
+    }
+}

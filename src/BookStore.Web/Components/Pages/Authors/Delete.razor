@@ -1,0 +1,64 @@
+@page "/authors/{Id:int}/delete"
+@inject AuthorApiClient AuthorApi
+@inject NavigationManager Nav
+
+<PageTitle>Delete author</PageTitle>
+
+@if (notFound)
+{
+    <p>Author not found.</p>
+}
+else if (author is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <h1 class="h3 mb-3 text-danger">Delete author</h1>
+    @if (!string.IsNullOrEmpty(error))
+    {
+        <div class="alert alert-danger">@error</div>
+    }
+    <p>Are you sure you want to delete this author?</p>
+
+    <dl class="row">
+        <dt class="col-sm-3">Name</dt>
+        <dd class="col-sm-9">@author.Name</dd>
+
+        <dt class="col-sm-3">Nationality</dt>
+        <dd class="col-sm-9">@author.Nationality</dd>
+
+        <dt class="col-sm-3">Books</dt>
+        <dd class="col-sm-9">@author.BookCount</dd>
+    </dl>
+
+    <button class="btn btn-danger" @onclick="HandleDelete">Delete</button>
+    <a class="btn btn-secondary" href="authors">Cancel</a>
+}
+
+@code {
+    [Parameter] public int Id { get; set; }
+    private AuthorResponse? author;
+    private bool notFound;
+    private string? error;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        author = await AuthorApi.GetByIdAsync(Id);
+        notFound = author is null;
+    }
+
+    private async Task HandleDelete()
+    {
+        error = null;
+        try
+        {
+            await AuthorApi.DeleteAsync(Id);
+            Nav.NavigateTo("authors");
+        }
+        catch (ApiException ex)
+        {
+            error = ex.Message;
+        }
+    }
+}

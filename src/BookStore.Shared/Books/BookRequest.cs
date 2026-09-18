@@ -1,7 +1,10 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace BookStore.Shared.Books;
 
 public class BookRequest
 {
+  [Required(ErrorMessage = "Title is required.")]
   public string Title { get; set; } = string.Empty;
   public string Isbn { get; set; } = string.Empty;
   public string Description { get; set; } = string.Empty;

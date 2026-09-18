@@ -1,0 +1,127 @@
+@page "/books/{Id:int}/edit"
+@inject BookApiClient BookApi
+@inject AuthorApiClient AuthorApi
+@inject NavigationManager Nav
+
+<PageTitle>Edit book</PageTitle>
+
+@if (notFound)
+{
+    <p>Book not found.</p>
+}
+else if (request is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <h1 class="h3 mb-3">Edit book</h1>
+
+    <EditForm Model="@request" OnValidSubmit="HandleUpdate">
+        <DataAnnotationsValidator />
+        @if (!string.IsNullOrEmpty(error))
+        {
+            <div class="alert alert-danger">@error</div>
+        }
+
+        <div class="row g-3">
+            <div class="col-md-8">
+                <label class="form-label">Title</label>
+                <InputText class="form-control" @bind-Value="request.Title" />
+                <ValidationMessage For="@(() => request.Title)" class="text-danger" />
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">ISBN</label>
+                <InputText class="form-control" @bind-Value="request.Isbn" />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Author</label>
+                <select class="form-select" @bind="request.AuthorId">
+                    @if (authors is not null)
+                    {
+                        @foreach (var author in authors)
+                        {
+                            <option value="@author.Id">@author.Name</option>
+                        }
+                    }
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Genre</label>
+                <InputText class="form-control" @bind-Value="request.Genre" />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Published date</label>
+                <InputDate class="form-control" @bind-Value="request.PublishedDate" />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Price</label>
+                <InputNumber class="form-control" step="0.01" @bind-Value="request.Price" />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Stock</label>
+                <InputNumber class="form-control" @bind-Value="request.Stock" />
+            </div>
+            <div class="col-12">
+                <label class="form-label">Description</label>
+                <InputTextArea class="form-control" rows="3" @bind-Value="request.Description" />
+            </div>
+        </div>
+
+        <div class="mt-3">
+            <button type="submit" class="btn btn-primary">Save</button>
+            <a class="btn btn-secondary" href="books">Cancel</a>
+        </div>
+    </EditForm>
+}
+
+@code {
+    [Parameter] public int Id { get; set; }
+    private BookRequest? request;
+    private List<AuthorResponse>? authors;
+    private bool notFound;
+    private string? error;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        authors = await AuthorApi.GetAllAsync();
+        var existing = await BookApi.GetByIdAsync(Id);
+        if (existing is null)
+        {
+            notFound = true;
+            return;
+        }
+
+        request = new BookRequest
+        {
+            Title = existing.Title,
+            Isbn = existing.Isbn,
+            Description = existing.Description,
+            Genre = existing.Genre,
+            Price = existing.Price,
+            Stock = existing.Stock,
+            PublishedDate = existing.PublishedDate,
+            AuthorId = existing.AuthorId
+        };
+    }
+
+    private async Task HandleUpdate()
+    {
+        error = null;
+        try
+        {
+            var updated = await BookApi.UpdateAsync(Id, request!);
+            if (updated is null)
+            {
+                notFound = true;
+                return;
+            }
+
+            Nav.NavigateTo("books");
+        }
+        catch (ApiException ex)
+        {
+            error = ex.Message;
+        }
+    }
+}

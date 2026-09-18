@@ -1,0 +1,65 @@
+@page "/authors/{Id:int}"
+@inject AuthorApiClient AuthorApi
+@inject BookApiClient BookApi
+
+<PageTitle>Author details</PageTitle>
+
+@if (notFound)
+{
+    <p>Author not found.</p>
+}
+else if (author is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <h1 class="h3 mb-3">@author.Name</h1>
+
+    <dl class="row">
+        <dt class="col-sm-3">Nationality</dt>
+        <dd class="col-sm-9">@author.Nationality</dd>
+
+        <dt class="col-sm-3">Birth date</dt>
+        <dd class="col-sm-9">@author.BirthDate.ToString("yyyy-MM-dd")</dd>
+
+        <dt class="col-sm-3">Bio</dt>
+        <dd class="col-sm-9">@author.Bio</dd>
+    </dl>
+
+    <h2 class="h5 mt-4">Books</h2>
+    @if (books is not null && books.Count > 0)
+    {
+        <ul>
+            @foreach (var book in books)
+            {
+                <li>@book.Title <span class="text-muted">(@book.PublishedDate.Year)</span></li>
+            }
+        </ul>
+    }
+    else
+    {
+        <p class="text-muted">No books registered for this author.</p>
+    }
+
+    <a class="btn btn-secondary" href="authors">Back</a>
+    <a class="btn btn-primary" href="@($"authors/{author.Id}/edit")">Edit</a>
+}
+
+@code {
+    [Parameter] public int Id { get; set; }
+    private AuthorResponse? author;
+    private List<BookResponse>? books;
+    private bool notFound;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        author = await AuthorApi.GetByIdAsync(Id);
+        notFound = author is null;
+        if (author is not null)
+        {
+            var all = await BookApi.GetAllAsync();
+            books = all.Where(b => b.AuthorId == Id).ToList();
+        }
+    }
+}
