@@ -15,33 +15,6 @@ A transição do ASP.NET MVC tradicional para Minimal APIs e Blazor visa alcanç
 
 ---
 
-## 🏗️ Arquitetura do Projeto
-
-O projeto foi reestruturado em **3 camadas principais** para manter a simplicidade e a separação de conceitos nesta fase inicial:
-
-### 1. `Core` (Lógica de Negócios e Domínio)
-Camada base e independente (Class Library). Contém o coração da aplicação.
-- **Entities:** Modelos de domínio genéricos.
-- **Interfaces:** Contratos para repositórios e serviços.
-- **Services:** Lógica central da aplicação.
-- *Não possui dependências das camadas `Api` ou `Web`.*
-
-### 2. `Api` (Backend - Minimal APIs)
-Responsável por expor os dados e a lógica de negócios para o mundo externo.
-- **Endpoints:** Construídos utilizando Minimal APIs do .NET 10.
-- **Injeção de Dependência:** Configuração de serviços e acesso a banco de dados.
-- **Segurança:** Autenticação e Autorização.
-- *Depende de: `Core`*
-
-### 3. `Web` (Frontend - Blazor WebApp)
-Interface de usuário moderna e interativa construída com Blazor WebAssembly.
-- **Componentes:** Páginas e componentes de UI reaproveitáveis.
-- **Serviços HTTP:** Clientes HTTP configurados para consumir a camada `Api`.
-- **Gerenciamento de Estado:** Controle do estado da aplicação no lado do cliente.
-- *Depende de: `Core` (para compartilhamento de DTOs) e consome a `Api`.*
-
----
-
 ## 🛠️ Tecnologias Utilizadas
 
 - **Framework:** [.NET 10](https://dotnet.microsoft.com/)
